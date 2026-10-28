@@ -16,8 +16,9 @@
   function err(tool, code, message) { return envelope(tool, { error: { code: code, message: message } }, false); }
 
   var impl = {
-    get_offers: function () { return { offers: D.offers, note: "The three offers have equal weight." }; },
+    get_offers: function () { return { offers: D.offers, assessment_area: D.assessment_area, note: "The three offers have equal weight. The staff-level assessment leads the assessment area, with the Business Assessment as a smaller first step." }; },
     get_assessment_details: function () { return D.assessment; },
+    get_business_assessment_details: function () { return D.business_assessment; },
     get_pricing: function () { return D.pricing; },
     get_sample_report: function () { return D.sample_report; },
     start_quiz_preview: function (args) {

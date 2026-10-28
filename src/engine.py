@@ -1,6 +1,6 @@
 """Tiny static-site engine: layout, helpers, mini markdown, link rewriting."""
 import html, json, re
-from content_core import CFG, NAV, PRICE, PRICE_LONG, agent_data
+from content_core import CFG, NAV, PRICE, PRICE_LONG, PRICED, STAFF_RANGE, OFFERS, BIZ, NICHES, agent_data
 
 SITE = CFG["siteUrl"].rstrip("/")
 PAGES = []          # (path, meta, fn)
@@ -96,14 +96,20 @@ def md(text, h2ids=True):
 def btn(label, href, kind="primary", extra=""):
     return f'<a class="btn btn--{kind}" href="{href}" {extra}>{esc(label)}<span class="btn__arrow" aria-hidden="true">&rarr;</span></a>'
 
-def buy_btn(label="Get the assessment", kind="primary", where="page"):
+def buy_btn(label="Get the Business Assessment", kind="secondary", where="page"):
+    """The existing purchase flow for the $1,000 + GST Business Assessment."""
     return btn(label, "{{PURCHASE}}", kind, f'data-cta="purchase" data-where="{where}"')
+
+def chat_btn(label="Book the 10-minute chat", kind="primary", src=None):
+    """Primary call to action: the 10-minute chat that leads to a quote for the staff-level assessment."""
+    href = "/book/" + (f"?src={src}" if src else "")
+    return btn(label, href, kind, 'data-cta="book-chat"')
 
 def book_btn(label="Book a call", kind="secondary"):
     return btn(label, "/book/", kind, 'data-cta="book"')
 
 def quiz_btn(label="Show me my #1 opportunity", kind="primary"):
-    href = "#start" if CTX.get("quiz") else "/assessment/#start"
+    href = "#start" if CTX.get("quiz") else "/business-assessment/#start"
     return btn(label, href, kind, 'data-open-quiz="1"')
 
 def book_line(prefix="Prefer to talk it through? "):
@@ -140,7 +146,7 @@ def faq(items, heading="Questions, answered.", h_id="faq", lead=None):
 
 def cta_band(h2, sub=None, buttons=None, extra_line=None):
     sub_html = f'<p class="lede">{inline(sub)}</p>' if sub else ""
-    btns = "".join(buttons) if buttons else buy_btn() + " " + book_btn()
+    btns = "".join(buttons) if buttons else chat_btn() + " " + buy_btn()
     line = extra_line or ""
     return (f'<section class="cta-band" aria-labelledby="cta-h"><div class="wrap wrap--narrow center">'
             f'<h2 id="cta-h">{esc(h2)}</h2>{sub_html}<div class="btn-row btn-row--center">{btns}</div>{line}</div></section>')
@@ -174,7 +180,6 @@ def cards(items, cls="cards cards--3"):
     return f'<div class="{cls}">{"".join(out)}</div>'
 
 def offer_cards(show_price=False, link_label="Read more"):
-    from content_core import OFFERS
     out = []
     for o in OFFERS:
         price = f'<p class="card__price">{esc(o["price"])}</p>' if show_price else ""
@@ -182,16 +187,40 @@ def offer_cards(show_price=False, link_label="Read more"):
                    f'<p>{inline(o["summary"])}</p><p class="card__link"><a class="text-link text-link--arrow" href="{o["url"]}">{esc(link_label)}</a></p></article>')
     return f'<div class="cards cards--3 cards--equal">{"".join(out)}</div>'
 
+def assessment_area(lead_link=True, first_step_link=True):
+    """The assessment area: the staff-level assessment is the lead card, the $1,000 + GST Business Assessment is the smaller first step."""
+    lead_more = '<p class="card__link"><a class="text-link text-link--arrow" href="/assessment/">How the staff-level assessment works</a></p>' if lead_link else ""
+    small_more = '<p class="card__link"><a class="text-link text-link--arrow" href="/business-assessment/">Read about the Business Assessment</a></p>' if first_step_link else ""
+    lead = (f'<article class="card card--accent" id="lead-card"><p class="tag">Staff-level AI Assessment</p><h3>Ask the people doing the work</h3>'
+            f'<p class="card__price">{PRICED}</p>'
+            f'<p>For businesses with roughly {STAFF_RANGE} staff. We ask your team, not only the owner, then show you every repeat task in hours and dollars a year, ranked, with no names.</p>'
+            f'<ul class="ticks"><li>A 10-minute chat with the owner first</li><li>A 5 minute survey and a 15 minute chat for each person</li><li>A findings report and a presentation to leadership, with one working demo on your own redacted paperwork</li></ul>'
+            f'<div class="btn-row">{chat_btn("Get a quote", src="quote")}</div>{lead_more}</article>')
+    small = (f'<article class="card" id="first-step"><p class="tag">{esc(BIZ["tag"])}</p><h3>{esc(BIZ["name"])}</h3>'
+             f'<p class="card__price">{esc(PRICE_LONG)}</p>'
+             f'<p>{inline(BIZ["summary"])} We email your report {esc(CFG["reportTurnaround"])}.</p>'
+             f'<div class="btn-row">{buy_btn(BIZ["cta"], "secondary", "assessment-area")}</div>'
+             f'<p class="small muted">GST is not included in the $1,000. Secure checkout. One payment, no subscription.</p>{small_more}</article>')
+    return f'<div class="cards cards--2 cards--equal">{lead}{small}</div>'
+
+def niche_cards(extra_card=True):
+    cs = "".join(f'<article class="card"><h3>{esc(n)}</h3><p>{esc(d)}</p></article>' for n, d in NICHES)
+    if extra_card:
+        cs += '<article class="card card--proof"><h3>Something else?</h3><p>If a lot of your team\'s week goes on repeatable admin, <a class="text-link" href="/book/">ask us</a>.</p></article>'
+    return f'<div class="cards cards--3 cards--equal">{cs}</div>'
+
 # ------------------------------------------------------------------ layout
 def organization_ld():
     return {"@context": "https://schema.org", "@type": "Organization", "@id": SITE + "/#org", "name": "MarvelUs", "url": SITE + "/",
-            "description": "Melbourne-based business offering AI digital support, SEO and a paid Business Assessment, delivered remotely.",
-            "areaServed": "Worldwide",
+            "description": "Melbourne-based business offering a staff-level AI assessment for businesses with roughly 15 to 150 staff, AI digital support, SEO and a smaller Business Assessment, delivered remotely across Australia.",
+            "areaServed": {"@type": "Country", "name": "Australia"},
             "address": {"@type": "PostalAddress", "addressLocality": "Melbourne", "addressRegion": "VIC", "addressCountry": "AU"}}
 
-def service_ld(name, desc, path, price=None):
+def service_ld(name, desc, path, price=None, pricing_note=None):
     d = {"@context": "https://schema.org", "@type": "Service", "name": name, "description": desc,
-         "provider": {"@id": SITE + "/#org"}, "areaServed": "Worldwide", "url": SITE + path}
+         "provider": {"@id": SITE + "/#org"}, "areaServed": {"@type": "Country", "name": "Australia"}, "url": SITE + path}
+    if pricing_note and not price:
+        d["offers"] = {"@type": "Offer", "description": pricing_note, "url": SITE + path}
     if price:
         d["offers"] = {"@type": "Offer", "priceSpecification": {"@type": "PriceSpecification", "price": str(price),
                        "priceCurrency": "AUD", "valueAddedTaxIncluded": False}, "url": SITE + path}
@@ -210,12 +239,12 @@ def header_html(path):
     for label, p in NAV:
         cur = ' aria-current="page"' if (path == p or (p != "/" and path.startswith(p) and p not in ("/",))) else ""
         lis.append(f'<li><a href="{p}"{cur}>{esc(label)}</a></li>')
-    lis.append('<li class="nav-book"><a href="/book/">Book a call</a></li>')
+    lis.append('<li class="nav-book"><a href="/book/">Book the 10-minute chat</a></li>')
     return (f'<header class="site-header" id="top"><div class="wrap header-row">'
             f'<a class="brand" href="/" aria-label="MarvelUs home"><span class="brand__mark" aria-hidden="true">M</span><span class="brand__name">MarvelUs</span></a>'
             f'<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span class="nav-toggle__label">Menu</span></button>'
             f'<nav id="site-nav" class="site-nav" aria-label="Main"><ul>{"".join(lis)}</ul></nav>'
-            f'<a class="btn btn--primary btn--sm header-cta" href="{{{{PURCHASE}}}}" data-cta="purchase" data-where="header">Get the assessment</a>'
+            f'<a class="btn btn--primary btn--sm header-cta" href="/book/" data-cta="book-chat" data-where="header">Book the 10-minute chat</a>'
             f'</div></header>')
 
 def footer_html():
@@ -223,11 +252,11 @@ def footer_html():
 <div class="footer-grid">
 <div><p class="brand brand--footer"><span class="brand__mark" aria-hidden="true">M</span><span class="brand__name">MarvelUs</span></p>
 <p>Practical AI help for businesses that want their time back.</p>
-<p>Based in Melbourne, Australia. Delivered remotely, anywhere.</p></div>
+<p>Based in Melbourne, Australia. Delivered remotely, anywhere in Australia.</p></div>
 <div><h2 class="footer-h">Company</h2><ul>
 <li><a href="/about/">About</a></li><li><a href="/case-studies/">Case studies</a></li><li><a href="/insights/">Insights</a></li><li><a href="/events/">Events</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/ai-consulting-melbourne/">Melbourne</a></li><li><a href="/book/">Work with us</a></li></ul></div>
 <div><h2 class="footer-h">Get started</h2><ul>
-<li><a href="/assessment/">Business Assessment</a></li><li><a href="/services/digital-support/">Digital support</a></li><li><a href="/services/seo/">SEO</a></li><li><a href="/book/">Book a call</a></li>
+<li><a href="/assessment/">Staff-level AI Assessment</a></li><li><a href="/business-assessment/">Business Assessment</a></li><li><a href="/services/digital-support/">Digital support</a></li><li><a href="/services/seo/">SEO</a></li><li><a href="/book/">Book the 10-minute chat</a></li>
 <li>Contact: {email_html()}</li><li>Phone: {phone_html()}</li></ul></div>
 <div><h2 class="footer-h">Connect</h2><p>{ph("social links, only profiles that exist", "contact")}</p></div>
 </div>

@@ -34,6 +34,29 @@ METHOD = [
     ("Automate last.", "Only where a person does not need to decide."),
 ]
 
+PRICED = "Priced by headcount"
+STAFF_RANGE = "15 to 150"
+BOOK_CHAT = "Book the 10-minute chat"
+STAFF_RATE = 53.71                               # Victorian average hourly rate, used as the default when a business does not share pay rates
+EXAMPLE_TIMES, EXAMPLE_MINUTES = 10, 60          # illustrative estimator example from the call deck, not client data
+
+NICHES = [
+    ("Trades and construction", "Quotes, job scheduling, variations and invoicing."),
+    ("Multi-practitioner clinics", "Bookings, reminders, intake forms and rescheduling."),
+    ("Real estate", "Enquiries, inspection bookings, follow-ups and listing paperwork."),
+    ("NDIS providers", "Scheduling, shift notes, plan paperwork and invoicing."),
+    ("Logistics and transport", "Quotes, bookings, dispatch scheduling and invoicing."),
+    ("Manufacturers and fabricators", "Quotes, job paperwork, ordering and invoicing."),
+    ("Auto repair", "Bookings, quotes, parts ordering and invoicing."),
+]
+
+STAFF_STEPS = [
+    ("A 10-minute chat.", "A short call with the owner. We ask where the time goes and which tasks come to mind. You decide if it is worth going further, and we say so if it is not."),
+    ("The paid assessment.", "Your team does a short survey of about 5 minutes. It ends with a 15 minute chat with each person, recorded with an AI note taker only with their explicit consent."),
+    ("Findings and presentation.", "A findings report with every task as times per week, minutes each, hours a year and dollars a year, ranked, with no names. Then we present it to leadership, with one working demo on your own redacted paperwork."),
+    ("Optional ongoing support.", "An optional ongoing support step, scoped after the findings."),
+]
+
 ASSESSMENT_STEPS = [
     ("Pay once.", f"{PRICE_LONG} through secure checkout. No subscription and no booking link to chase."),
     ("Call when you are ready.", f"After payment you see a call-in number and your own access code. Ring any time that suits you. An AI voice agent asks the questions and follows your answers. It takes {CALL}."),
@@ -42,6 +65,11 @@ ASSESSMENT_STEPS = [
 ]
 
 OFFERS = [
+    {
+        "id": "staff-assessment", "name": "Staff-level AI Assessment", "tag": "Ask the people doing the work", "url": "/assessment/",
+        "summary": f"For businesses with roughly {STAFF_RANGE} staff. A 10-minute chat with the owner, then a short survey and a 15 minute chat with each person on your team. You get every repeat task in hours and dollars a year, ranked, with no names.",
+        "price": PRICED, "cta": "Book the 10-minute chat",
+    },
     {
         "id": "digital-support", "name": "Digital support", "tag": "Chat or voice", "url": "/services/digital-support/",
         "summary": "An AI assistant that answers questions by chat or by phone, for your customers or for your own staff. It uses your information, hands off to a person when it should, and keeps a record of every conversation.",
@@ -52,12 +80,14 @@ OFFERS = [
         "summary": "Search work that gets the right people to your site and makes sure they can act when they arrive. We fix what is broken, write what is missing and report what changed.",
         "price": "Scoped to your business", "cta": "Book a call",
     },
-    {
-        "id": "business-assessment", "name": "Business Assessment (AI Readiness)", "tag": "Know where to start", "url": "/assessment/",
-        "summary": f"A phone intake call of {CALL} and a full written report. You get a score out of 100, your opportunities ranked, and the monthly cost of each one in dollars.",
-        "price": PRICE_LONG, "cta": "Get the assessment",
-    },
 ]
+
+# The smaller first step. It sits in the assessment area next to the lead offer. It is not one of the three equal offers.
+BIZ = {
+    "id": "business-assessment", "name": "Business Assessment (AI Readiness)", "tag": "A smaller first step you can start now", "url": "/business-assessment/",
+    "summary": f"A phone intake call of {CALL} and a full written report. You get a score out of 100, your opportunities ranked, and the monthly cost of each one in dollars.",
+    "price": PRICE_LONG, "cta": "Get the Business Assessment",
+}
 
 # ---------------------------------------------------------------- quiz data
 INDUSTRIES = [
@@ -212,22 +242,54 @@ def sample_numbers():
 
 SN = sample_numbers()
 
+# ---------------------------------------------------------------- staff-level sample findings report (illustrative example data)
+# The first row is the call deck's illustrative figure. The other rows are invented for the example. None of it is client data.
+STAFF_ROWS = [
+    # role, task, times a week, minutes each, money route label, note
+    ("Estimator", "Writing quotes from site notes and photos", EXAMPLE_TIMES, EXAMPLE_MINUTES, "Waiting work gets done", "Quotes sit unsent while the estimator writes them, so some work waits."),
+    ("Office administrator", "Retyping job details into the accounting software", 25, 12, "Capacity until used", "The time returns to the day. It only becomes dollars when something changes because of it."),
+    ("Project coordinator", "Chasing approvals and missing information", 12, 20, "Capacity until used", "Waiting is part of the delay. Faster replies free time but do not stop any spend by themselves."),
+    ("Office administrator", "Answering the same customer questions", 30, 5, "A hire avoided", "Counts only if the business was planning to hire for this and now will not."),
+    ("Accounts", "Chasing overdue invoices", 8, 15, "Not known yet", "The business has not said whether anyone is paid overtime for this, so it is not counted as dollars yet."),
+]
+
+def staff_numbers():
+    rows = []
+    for role, task, n, m, route, note in STAFF_ROWS:
+        hours_week = n * m / 60
+        hours_year = hours_week * 52
+        rows.append({"role": role, "task": task, "times_per_week": n, "minutes_each": m, "hours_per_week": hours_week,
+                     "hours_per_year": round(hours_year), "dollars_per_year": round(hours_year * STAFF_RATE), "route": route, "note": note})
+    rows.sort(key=lambda r: -r["dollars_per_year"])
+    return {"rows": rows, "total_hours_year": sum(r["hours_per_year"] for r in rows),
+            "total_dollars_year": round(sum(r["hours_per_year"] for r in rows) * STAFF_RATE)}
+
+STAFF_SN = staff_numbers()
+EX_HOURS_WEEK = EXAMPLE_TIMES * EXAMPLE_MINUTES / 60            # 10
+EX_HOURS_YEAR = round(EX_HOURS_WEEK * 52)                       # 520
+EX_DOLLARS_YEAR = round(EX_HOURS_WEEK * 52 * STAFF_RATE)        # 27929
+assert (EX_HOURS_WEEK, EX_HOURS_YEAR, EX_DOLLARS_YEAR) == (10, 520, 27929)
+
+def aud(n):
+    return "A${:,.0f}".format(n)
+
 def money(n):
     return "${:,.0f}".format(n)
 
-NAV = [("Business Assessment", "/assessment/"), ("Services", "/services/"), ("Results", "/results/"),
-       ("Pricing", "/pricing/"), ("Insights", "/insights/"), ("Events", "/events/"), ("About", "/about/")]
+NAV = [("Staff Assessment", "/assessment/"), ("Business Assessment", "/business-assessment/"), ("Services", "/services/"), ("Results", "/results/"),
+       ("Pricing", "/pricing/"), ("Insights", "/insights/"), ("About", "/about/")]
 
 SITE_MAP = [
-    ("Home", "/", "Quiz, offers, process, sample report teaser"),
-    ("Business Assessment", "/assessment/", f"{PRICE_LONG}, phone intake and scored report"),
+    ("Home", "/", "Staff-level AI Assessment first, then the three offers"),
+    ("Staff-level AI Assessment", "/assessment/", f"For businesses with roughly {STAFF_RANGE} staff. {PRICED}. Book a 10-minute chat"),
+    ("Business Assessment", "/business-assessment/", f"A smaller first step you can start now. {PRICE_LONG}, phone intake and scored report"),
     ("Services", "/services/", "Three equal offers"),
     ("Digital support", "/services/digital-support/", "AI chat or voice assistant, scoped to your business"),
     ("SEO", "/services/seo/", "Search work, scoped to your business"),
     ("Results", "/results/", "Placeholders until real proof is approved"),
     ("Case studies", "/case-studies/", "Index"),
     ("Case study template", "/case-studies/template/", "Template with required client approvals"),
-    ("Pricing", "/pricing/", "Three equal offers"),
+    ("Pricing", "/pricing/", "Priced by headcount for the staff-level assessment, a fixed price for the smaller first step"),
     ("Insights", "/insights/", "Articles and outlines"),
     ("What is an AI readiness assessment?", "/insights/what-is-an-ai-readiness-assessment/", "Article"),
     ("How to work out the cost of a repeated task", "/insights/how-to-work-out-the-cost-of-a-repeated-task/", "Article"),
@@ -235,20 +297,56 @@ SITE_MAP = [
     ("Article template", "/insights/template/", "Template"),
     ("Events", "/events/", "Placeholders"),
     ("About", "/about/", "MarvelUs, how we work"),
-    ("Book a call", "/book/", "Booking with a placeholder embed slot"),
-    ("AI consulting in Melbourne", "/ai-consulting-melbourne/", "Melbourne page"),
-    ("Sample report", "/report/sample/", "Example report, invented data"),
+    ("Book the 10-minute chat", "/book/", "Booking with a placeholder embed slot"),
+    ("AI consulting in Melbourne", "/ai-consulting-melbourne/", "Melbourne based, remote across Australia"),
+    ("Sample staff-level findings report", "/report/sample/", "Example report, illustrative data, not client data"),
+    ("Sample Business Assessment report", "/report/business-assessment-sample/", "Example report, invented data"),
     ("Privacy (draft)", "/privacy/", "Draft, needs lawyer review"),
     ("Terms (draft)", "/terms/", "Draft, needs lawyer review"),
     ("Cookies (draft)", "/cookies/", "Draft, needs lawyer review"),
 ]
 
 def agent_data():
+    base = CFG["siteUrl"]
+    staff_rows = [{"rank": i + 1, "role": r["role"], "task": r["task"], "times_per_week": r["times_per_week"], "minutes_each": r["minutes_each"],
+                   "hours_per_year": r["hours_per_year"], "dollars_per_year_aud": r["dollars_per_year"], "money_route": r["route"]}
+                  for i, r in enumerate(STAFF_SN["rows"])]
     return {
         "offers": [{"id": o["id"], "name": o["name"], "tag": o["tag"], "price": o["price"], "url": o["url"],
                     "summary": o["summary"]} for o in OFFERS],
+        "assessment_area": {
+            "lead": {"id": OFFERS[0]["id"], "name": OFFERS[0]["name"], "pricing": PRICED, "url": OFFERS[0]["url"]},
+            "smaller_first_step": {"id": BIZ["id"], "name": BIZ["name"], "price_label": PRICE, "url": BIZ["url"],
+                                   "note": "A smaller first step you can start now."},
+        },
         "assessment": {
+            "name": "Staff-level AI Assessment",
+            "role": "The lead offer",
+            "for": f"Businesses with roughly {STAFF_RANGE} staff, owner-led or run by an owner and a general manager, with a lot of repeatable admin.",
+            "idea": "We ask the people doing the work, not only the owner.",
+            "pricing": {"model": PRICED, "amount": None, "published_figures": False,
+                        "how_to_get_a_quote": "Book the 10-minute chat. A quote follows once we know the headcount."},
+            "path": [{"step": i + 1, "name": a, "detail": b} for i, (a, b) in enumerate(STAFF_STEPS)],
+            "what_is_delivered": [
+                "Team survey: about 5 minutes per person, ending with a booking for a 15 minute chat.",
+                "A 15 minute chat with each person, recorded with an AI note taker with explicit consent.",
+                "Findings report: every task as times per week, minutes each, hours a year and dollars a year, ranked, with no names.",
+                "Findings presentation to leadership, including one working demo on the business's own redacted paperwork."],
+            "tasks_not_jobs_promise": "Answers are grouped by task and role, never by name. Nobody is being assessed.",
+            "dollar_maths": "times per week x minutes each x 52 x pay rate = dollars a year. The Victorian average rate is used if the business prefers not to share pay rates.",
+            "honesty_rule": "Hours only count as dollars when spend stops, a hire is avoided, or waiting work gets done. Recovered time is capacity until it is used.",
+            "staff_time_cost": "A 5 minute survey and a 15 minute chat for each person. One call for the owner.",
+            "optional_next_step": "An optional ongoing support step, scoped after the findings.",
+            "consent_and_privacy": "Recording needs explicit consent. Retention plan and handling of declined recordings are placeholders until MarvelUs confirms them. Not legal advice.",
+            "who_we_work_with": [{"name": n, "repeat_admin": d} for n, d in NICHES],
+            "location": "Melbourne based, working remotely with businesses anywhere in Australia.",
+            "sample_report_url": base + "/report/sample/",
+            "book_the_chat_url": base + CFG["bookingPath"],
+            "smaller_first_step": {"name": BIZ["name"], "price_label": PRICE, "url": base + BIZ["url"], "purchase_url": CFG["purchaseUrl"]},
+        },
+        "business_assessment": {
             "name": "Business Assessment (AI Readiness)",
+            "role": "A smaller first step you can start now",
             "price": {"amount": CFG["assessmentPriceAUD"], "currency": "AUD", "gst_included": False,
                       "label": PRICE, "note": "GST is added on top of the price."},
             "duration": CALL,
@@ -268,32 +366,36 @@ def agent_data():
                 "Every figure traces to something the client said. Missing facts stay unknown.",
                 "If the hours just disappear into the day, the number is zero."],
             "purchase_url": CFG["purchaseUrl"],
-            "book_a_call_url": CFG["siteUrl"] + CFG["bookingPath"],
+            "sample_report_url": base + "/report/business-assessment-sample/",
+            "details_url": base + BIZ["url"],
         },
         "pricing": {
-            "business_assessment": {"amount": CFG["assessmentPriceAUD"], "currency": "AUD", "gst_included": False, "label": PRICE},
+            "staff_level_assessment": {"model": PRICED, "amount": None, "published_figures": False, "cta": "Book the 10-minute chat to get a quote"},
+            "business_assessment": {"amount": CFG["assessmentPriceAUD"], "currency": "AUD", "gst_included": False, "label": PRICE,
+                                    "note": "A smaller first step you can start now."},
             "digital_support": {"price": None, "label": "Scoped to your business", "cta": "Book a call"},
             "seo": {"price": None, "label": "Scoped to your business", "cta": "Book a call"},
-            "notes": "Digital support and SEO have no published price.",
+            "notes": "The staff-level assessment is priced by headcount and has no published figures. Digital support and SEO have no published price.",
         },
         "sample_report": {
-            "label": "Example only, invented data, not a client result",
-            "url": CFG["siteUrl"] + "/report/sample/",
-            "score": SN["score"], "score_out_of": 100,
-            "dimension_levels": {d[1]: SAMPLE_DIMS[d[0]] for d in DIMENSIONS},
-            "lowest_dimension": [d[1] for d in DIMENSIONS if d[0] == SN["lowest"]][0],
-            "hourly_rate_used": SAMPLE_RATE,
-            "total_hours_per_week": SN["total_hours"],
-            "time_cost_per_month": SN["total_monthly"],
-            "counted_as_money_per_month": SN["counted_monthly"],
-            "opportunities": [{"rank": i + 1, "name": r["name"], "hours_per_week": r["hours"], "monthly_cost": r["monthly_cost"],
-                               "money_route": r["route"]} for i, r in enumerate(SN["rows"])],
+            "label": "Example only, illustrative data, not client data",
+            "url": base + "/report/sample/",
+            "pay_rate_used_aud_per_hour": STAFF_RATE,
+            "pay_rate_note": "Victorian average, used as the default when a business does not share pay rates.",
+            "illustration": {"role": "Estimator", "task": "Writing quotes", "times_per_week": EXAMPLE_TIMES, "minutes_each": EXAMPLE_MINUTES,
+                             "hours_per_week": EX_HOURS_WEEK, "hours_per_year": EX_HOURS_YEAR, "dollars_per_year_aud": EX_DOLLARS_YEAR},
+            "ranked_tasks": staff_rows,
+            "total_hours_per_year": STAFF_SN["total_hours_year"],
+            "total_dollars_per_year_aud": STAFF_SN["total_dollars_year"],
+            "honesty_rule": "Hours only count as dollars when spend stops, a hire is avoided, or waiting work gets done. Recovered time is capacity until it is used.",
+            "business_assessment_sample_url": base + "/report/business-assessment-sample/",
         },
         "quiz": {
-            "url": CFG["siteUrl"] + "/#start",
+            "url": base + "/#start",
             "steps": ["Your website (optional)", "The bottleneck", "The hours", "Where it breaks", "The tools", "The cost",
                       "The size (annual revenue band, AUD)", "Your first name", "Building your result"],
             "extra_screens": ["Industry check", "Email gate (demo, nothing is sent)", "Result (example-style preview)"],
+            "result_next_steps": {"primary": "Book the 10-minute chat (staff-level assessment)", "secondary": f"Business Assessment, {PRICE_LONG}"},
             "stored_or_transmitted": "Nothing. The quiz runs in the browser only.",
             "preview_hourly_rate_aud": RATE,
         },
@@ -303,8 +405,8 @@ def agent_data():
             "phone": CFG["contactPhone"] or None,
             "booking_path": CFG["bookingPath"],
             "booking_embed_connected": bool(CFG["bookingEmbedUrl"]),
-            "message": "Contact email and phone are not published yet. Use the booking page.",
+            "message": "Contact email and phone are not published yet. Use the booking page for the 10-minute chat.",
         },
-        "location": {"base": "Melbourne, Australia", "delivery": "Remote, anywhere"},
+        "location": {"base": "Melbourne, Australia", "delivery": "Remote, anywhere in Australia"},
         "site_map": [{"title": t, "path": p, "note": n} for t, p, n in SITE_MAP],
     }

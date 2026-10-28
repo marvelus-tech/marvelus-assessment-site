@@ -1,6 +1,6 @@
 from engine import *
 from content_core import *
-from pages_a import ladder_bars
+from pages_a import ladder_bars, staff_mock
 
 DISCLOSURE = "This guide is general information, not legal, tax or financial advice. We sell AI services, so weigh our view with that in mind."
 
@@ -51,7 +51,7 @@ Plainly. Hours a week × hourly rate × {WEEKS} weeks in a month. If a task take
 ## What happens after the assessment?
 
 You have three choices. Do the work yourself, hire someone to do it or decide it is not worth it right now. All three are fine. The point is that you are choosing with numbers.""",
-  "next": [("The MarvelUs Business Assessment", "/assessment/"), ("How to work out what a task costs", "/insights/how-to-work-out-the-cost-of-a-repeated-task/")],
+  "next": [("The MarvelUs Business Assessment, a smaller first step", "/business-assessment/"), ("The Staff-level AI Assessment, for roughly 15 to 150 staff", "/assessment/"), ("How to work out what a task costs", "/insights/how-to-work-out-the-cost-of-a-repeated-task/")],
   "sources": "add 3 to 5 real, checkable public sources, for example Australian Government AI guidance for business and a recognised public business survey on AI adoption. Verify each link and date before publishing. Cite nothing that has not been opened and read",
   "faq": [("How long does an assessment take?", f"Ours takes {CALL} on the phone. We email the report {CFG['reportTurnaround']}."),
           ("Do I need technical knowledge?", "No. You describe how work happens. We do the translation."),
@@ -96,12 +96,12 @@ Mark them unknown. If you do not know how many hours a task takes, time it for a
 
 ## What about the cost of the fix?
 
-Subtract it. If a fix costs $3,000 and saves $1,732 a month, it pays back in a little under two months. If it saves $200 a month, it takes over a year, and you may decide it is not worth doing yet.
+Subtract it. If a fix costs $2,400 and saves $1,732 a month, it pays back in a little under two months. If it saves $200 a month, it takes over a year, and you may decide it is not worth doing yet.
 
 ## What do I do with the number?
 
 Rank your tasks by cost, check which are safest to change and start with the one that is both large and low risk.""",
-  "next": [("The Business Assessment does this for the whole business", "/assessment/"), ("Try the free preview for one task", "/#start")],
+  "next": [("The Staff-level AI Assessment does this with your whole team", "/assessment/"), ("The Business Assessment does it from the owner's view", "/business-assessment/"), ("Try the free preview for one task", "/#start")],
   "sources": "add real, verified sources for on-costs and weeks per month, for example the Fair Work Ombudsman pay and super pages. Open and verify each link first",
   "faq": [(f"Why {WEEKS} and not 4?", "Because months have slightly more than four weeks. Using 4 under-counts by about 8 percent."),
           ("Should I include my own time?", "Yes, at what an hour of your time is worth to the business."),
@@ -115,7 +115,7 @@ OUTLINES = [
  ("How to choose an AI consultant in Melbourne and Australia", "Getting started", ["What should a consultant deliver?", "Questions to ask before you hire", "Red flags", "How pricing usually works", "What to ask for in writing"]),
  ("What does AI digital support cost?", "Digital support", ["Chat vs voice", "What drives the price", "Build and running costs", "What is worth paying for", "How to measure whether it worked"]),
  ("SEO for local businesses: where to start", "SEO", ["What search customers really type", "The five fixes that matter first", "Your Google Business listing", "How long it takes", "What to ignore"]),
- ("AI and customer privacy in Australia", "Digital support", ["What data does an AI assistant touch?", "What the Privacy Act expects", "What to ask a supplier", "What to put in your privacy policy"]),
+ ("AI and customer privacy in Australia", "Digital support", ["What data does an AI assistant touch?", "What to ask about how your data is handled", "What to ask a supplier", "What to put in your privacy policy"]),
  ("When AI is not the answer", "Getting started", ["Fix the process first", "Five signs a task should be removed, not automated", "When a setting in your current software is enough", "The order we work in"]),
 ]
 
@@ -149,8 +149,8 @@ def article_html(a, template=False):
     for q, ans in a["faq"]:
         CTX["faq"].append((q, ans))
         h.append(f'<details class="faq__item"><summary><span>{esc(q)}</span><span class="faq__icon" aria-hidden="true"></span></summary><div class="faq__body">{md(ans)}</div></details>')
-    h.append(f'''<aside class="cta-card"><h2 class="h3">Want this answered for your own business?</h2><p>The Business Assessment gives you a score, a ranked list and the dollar cost of each item.</p><div class="btn-row">{buy_btn()} {book_btn()}</div></aside>
-<aside class="byline-card" aria-label="About the author"><p class="brand__mark" aria-hidden="true">M</p><div><p><strong>MarvelUs</strong></p><p class="small">A Melbourne business helping businesses use AI where it earns its place.</p></div></aside>
+    h.append(f'''<aside class="cta-card"><h2 class="h3">Want this answered for your own business?</h2><p>The Staff-level AI Assessment asks your team and gives you a ranked list with the dollar cost of each task. The Business Assessment is a smaller first step.</p><div class="btn-row">{chat_btn()} {buy_btn(f"Business Assessment, {PRICE}")}</div></aside>
+<aside class="byline-card" aria-label="About the author"><p class="brand__mark" aria-hidden="true">M</p><div><p><strong>MarvelUs</strong></p><p class="small">A Melbourne business that asks your team where the time goes, then helps use AI where it earns its place.</p></div></aside>
 </div></div>
 <section class="section section--dim"><div class="wrap"><h2>Keep reading</h2><div class="cards cards--3 cards--equal">{"".join(keep)}</div></div></section></article>''')
     return "\n".join(h)
@@ -210,10 +210,39 @@ def outlines():
     h.append(cta_band("Want this answered for your own business?"))
     return "\n".join(h)
 
-# ------------------------------------------------------------------ sample report
-@page("/report/sample/", "Sample Business Assessment report | MarvelUs", "An example of the report you receive from a MarvelUs Business Assessment. Invented data, not a client's report.", bodyclass="report")
+# ------------------------------------------------------------------ sample staff-level findings report
+@page("/report/sample/", "Sample staff-level findings report | MarvelUs", "An example of the findings report from a MarvelUs staff-level AI assessment. Illustrative data, not client data.", bodyclass="report")
 def sample_report():
-    from pages_a import ladder_bars
+    r = STAFF_SN
+    rows = ""
+    for i, x in enumerate(r["rows"], 1):
+        hw = f'{x["hours_per_week"]:g}'
+        rows += (f'<tr><th scope="row">{i}. {sample_tag(x["task"])}<br><span class="small muted">{esc(x["role"])}</span></th><td>{x["times_per_week"]}</td><td>{x["minutes_each"]}</td><td>{hw} &times; 52 = {x["hours_per_year"]}</td>'
+                 f'<td><strong>{aud(x["dollars_per_year"])}</strong></td><td><span class="route">{esc(x["route"])}</span><br><span class="small">{esc(x["note"])}</span></td></tr>')
+    h = [f'''<section class="hero hero--page"><div class="wrap wrap--hero">{crumbs([("Home", "/"), ("Staff-level AI Assessment", "/assessment/"), ("Sample findings report", "/report/sample/")])}
+<p class="banner">Example only. Illustrative data, not client data. No real business, person or result is shown.</p>
+{eyebrow("Sample findings report")}<h1>A sample staff-level findings report</h1>
+<p class="lede lede--lg">This is the shape of the report you would receive after the team survey and chats. Every task is shown as times a week, minutes each, hours a year and dollars a year, ranked, with no names.</p>
+<div class="btn-row">{chat_btn("Book the 10-minute chat")} <button class="btn btn--ghost" type="button" data-print>Print this page</button></div></div></section>''']
+    h.append(section(f'''<h2>1. Cover</h2><dl class="kv kv--wide"><dt>Business</dt><dd>{sample_tag("Example Fabrication Pty Ltd")}</dd><dt>Size</dt><dd>{sample_tag("About 40 staff")}</dd><dt>People who took part</dt><dd>{sample_tag("An example of the count, for instance 34 of 40")}</dd><dt>Pay rate used</dt><dd>A${STAFF_RATE} an hour, the Victorian average, because this example business chose not to share pay rates</dd></dl>'''))
+    h.append(section(f'''<h2>2. How to read this report</h2><ul class="ticks"><li>It is about tasks, not jobs. Nobody is being assessed.</li><li>Answers are grouped by task and role. There are no names.</li><li>Each figure is times a week &times; minutes each &times; 52 &times; pay rate.</li><li>Where the report says "capacity until used", the time comes back to the day. It becomes dollars only when something changes because of it.</li></ul>''', "section--dim"))
+    h.append(section(f'''<div class="split split--top"><div><h2>3. One task, worked through</h2>
+<p class="lede">This is the example we use to show the maths. It is illustrative, not client data.</p>
+<p>An estimator writes {EXAMPLE_TIMES} quotes a week, and each takes about {EXAMPLE_MINUTES} minutes. That is {EX_HOURS_WEEK:.0f} hours a week, about {EX_HOURS_YEAR} hours a year. At A${STAFF_RATE} an hour, that is about {aud(EX_DOLLARS_YEAR)} a year.</p></div>{staff_mock()}</div>'''))
+    h.append(section(f'''<h2>4. Every task, ranked</h2><p class="lede">Ranked by dollars a year. The last column applies the honesty rule: hours only count as dollars when spend stops, a hire is avoided, or waiting work gets done.</p>
+<div class="table-wrap"><table class="report-table"><caption class="sr-only">Ranked tasks with the maths</caption><thead><tr><th scope="col">Task and role</th><th scope="col">Times a week</th><th scope="col">Minutes each</th><th scope="col">Hours a year</th><th scope="col">Dollars a year</th><th scope="col">Does it count as money?</th></tr></thead><tbody>{rows}</tbody></table></div>
+<p>In total, across these five example tasks: {r["total_hours_year"]:,} hours a year, about <strong>{aud(r["total_dollars_year"])} a year</strong> at A${STAFF_RATE} an hour. That is the value of the time, not money in the bank. Only tasks marked as money routes turn into dollars, and only when the change actually happens.</p>''', "section--dim"))
+    h.append(section(f'''<h2>5. What to do first</h2><ol class="read-lines"><li>{sample_tag("Draft quotes from the five most recent similar jobs, so the estimator starts from a draft, not a blank page.")}</li><li>{sample_tag("Stop retyping job details: pass them once from the job record to the accounting software.")}</li><li>{sample_tag("Write standard answers to the most common customer questions and use them every time.")}</li></ol>
+<p class="small muted">Invented for this example. A real report is based on what your team told us.</p>'''))
+    h.append(section(f'''<h2>6. The presentation to leadership</h2><p>After the report, we present the findings to your leadership. That includes one working demo on your own redacted paperwork, so you see what it would look like on your real documents, with names and personal details removed.</p>''', "section--dim"))
+    h.append(section(f'''<h2>7. Names and privacy</h2><p>The report has no names. Staff answers are grouped by task and role. Chats are recorded with an AI note taker only with explicit consent. {ph("retention plan: how long recordings and transcripts are kept and who can access them", "legal")}</p>'''))
+    h.append(cta_band("Want a report like this for your team?", f"The staff-level assessment is {PRICED.lower()}. Book the 10-minute chat and we will quote.", [chat_btn(), buy_btn(f"Or start smaller: Business Assessment, {PRICE}", "secondary", "staff-sample")]))
+    return "\n".join(h)
+
+# ------------------------------------------------------------------ sample Business Assessment report
+@page("/report/business-assessment-sample/", "Sample Business Assessment report | MarvelUs", "An example of the report you receive from a MarvelUs Business Assessment, the smaller first step. Invented data, not a client's report.", bodyclass="report")
+def biz_sample_report():
+    from pages_a import ladder_bars, staff_mock
     r = SN
     lowest_name = [d[1] for d in DIMENSIONS if d[0] == r["lowest"]][0]
     rows = ""
@@ -222,11 +251,11 @@ def sample_report():
         lab = {"counts": "Counts as money", "zero": "Counts as zero", "unknown": "Unknown"}[x["route"]]
         rows += (f'<tr><th scope="row">{i}. {sample_tag(x["name"])}</th><td>{x["hours"]}</td><td>${SAMPLE_RATE}</td>'
                  f'<td>{x["hours"]} &times; ${SAMPLE_RATE} &times; {WEEKS} = <strong>{money(cost)}</strong></td><td><span class="route route--{x["route"]}">{lab}</span><br><span class="small">{esc(x["note"])}</span></td></tr>')
-    h = [f'''<section class="hero hero--page"><div class="wrap wrap--hero">{crumbs([("Home", "/"), ("Sample report", "/report/sample/")])}
+    h = [f'''<section class="hero hero--page"><div class="wrap wrap--hero">{crumbs([("Home", "/"), ("Business Assessment", "/business-assessment/"), ("Sample report", "/report/business-assessment-sample/")])}
 <p class="banner">Example only. This is not a real client's report. Every name and number below is invented.</p>
 {eyebrow("Sample report")}<h1>A sample Business Assessment report</h1>
 <p class="lede lede--lg">This is what you would receive, emailed {esc(CFG["reportTurnaround"])}. A real report uses your own answers, your own hours and your own rate.</p>
-<div class="btn-row">{buy_btn()} {book_btn()} <button class="btn btn--ghost" type="button" data-print>Print this page</button></div></div></section>''']
+<div class="btn-row">{buy_btn(kind="primary")} {chat_btn("Book the 10-minute chat", "secondary")} <button class="btn btn--ghost" type="button" data-print>Print this page</button></div></div></section>''']
     h.append(section(f'''<h2>1. Cover</h2><dl class="kv kv--wide"><dt>Business</dt><dd>{sample_tag("Example Plumbing Pty Ltd")}</dd><dt>Date</dt><dd>{sample_tag("1 January 2027")}</dd><dt>Readiness score</dt><dd>{sample_tag(f"{r['score']} / 100")}</dd></dl>'''))
     h.append(section(f'''<h2>2. Where you are</h2><p class="lede">Five dimensions, each on a five-point ladder from ad hoc to optimised. The score is the average level shown as a share of the top level: {r["avg_level"]:.1f} of 5, which is {r["score"]} out of 100.</p>
 {ladder_bars(SAMPLE_DIMS, r["lowest"])}
@@ -240,7 +269,7 @@ def sample_report():
 <h2>6. What to leave alone</h2><p>{sample_tag("Weekly reporting built by hand: it takes 2 hours, nobody reads it and removing it saves more than automating it. Delete it first.")}</p>'''))
     h.append(section(f'''<h2>7. Your call transcript (excerpt)</h2><div class="transcript" aria-label="Example transcript excerpt"><p><strong>Agent:</strong> {sample_tag("Tell me about the last quote you sent. What happened between the enquiry and the send?")}</p><p><strong>Owner:</strong> {sample_tag("Usually three days. I wait for the supplier price, then retype it all into the accounting software.")}</p><p><strong>Agent:</strong> {sample_tag("How many of those a week?")}</p></div>
 <p class="small muted">Invented for this example. Real transcripts are yours and are not shown anywhere.</p>''', "section--dim"))
-    h.append(cta_band("Get a report like this for your business.", f"The Business Assessment is {PRICE_LONG}."))
+    h.append(cta_band("Get a report like this for your business.", f"The Business Assessment is {PRICE_LONG}. It is a smaller first step you can start now.", [buy_btn(kind="primary", where="sample-cta"), chat_btn("Or book the 10-minute chat", "secondary")]))
     return "\n".join(h)
 
 # ------------------------------------------------------------------ legal
@@ -254,9 +283,9 @@ def legal_page(path, title, desc, h1, sections, extra=""):
 
 legal_page("/privacy/", "Privacy", "Draft privacy policy skeleton for MarvelUs. Needs lawyer review before launch.", "Privacy Policy",
            ["Who we are", "What you give us", "What we collect automatically", "How we use it", "Who we share it with", "How long we keep it", "Security",
-            "Your choices and rights, including access and correction under Australian privacy law", "Voice call recordings and transcripts", "Children", "Third-party links", "Changes", "Contact"])
+            "Your choices and rights, including access and correction under Australian privacy law", "Voice call recordings, staff chat recordings and transcripts", "Children", "Third-party links", "Changes", "Contact"])
 legal_page("/terms/", "Terms", "Draft terms skeleton for MarvelUs. Needs lawyer review before launch.", "Terms",
-           ["Using the site", "Information, not advice", "The free preview", "The Business Assessment (what is delivered, what it is not)", "Bookings, events and purchases", "Results and testimonials",
+           ["Using the site", "Information, not advice", "The free preview", "The Staff-level AI Assessment and the Business Assessment (what is delivered, what it is not)", "Bookings, events and purchases", "Results and testimonials",
             "Our content", "Your content", "Third-party services", "Disclaimer", "Limitation of liability", "Governing law (Victoria, Australia)", "Changes", "Contact"])
 legal_page("/cookies/", "Cookies", "Draft cookie policy skeleton for MarvelUs. Needs lawyer review before launch.", "Cookie Policy",
            ["What we use", "Your choices", "Manage cookies", "Changes", "Contact"],
@@ -264,4 +293,4 @@ legal_page("/cookies/", "Cookies", "Draft cookie policy skeleton for MarvelUs. N
 
 @page("/404.html", "Page not found | MarvelUs", "That page does not exist. Try the home page or the site map.", kind="404")
 def notfound():
-    return hero("404", "That page is not here.", "The link may be old or mistyped. Try the home page, or one of these.", btn("Home", "/", "primary") + book_btn() + buy_btn("Get the assessment", "secondary"), center=True)
+    return hero("404", "That page is not here.", "The link may be old or mistyped. Try the home page, or one of these.", btn("Home", "/", "primary") + chat_btn("Book the 10-minute chat", "secondary") + buy_btn(f"Business Assessment, {PRICE}", "secondary"), center=True)

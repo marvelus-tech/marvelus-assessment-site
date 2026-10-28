@@ -20,19 +20,21 @@ def envelope(tool, data, delight=None, ok=True, meta_extra=None):
     return env
 
 TOOLS = [
-    ("get_offers", "List MarvelUs's three equal offers: digital support, SEO and the Business Assessment.", {}),
-    ("get_assessment_details", "Price, duration, scoring dimensions, process and method for the Business Assessment (AI Readiness).", {}),
-    ("get_pricing", "What is priced and what is not. The assessment is $1,000 AUD plus GST. Other offers are scoped to the business.", {}),
-    ("get_sample_report", "The example report, with invented data clearly labelled as an example.", {}),
+    ("get_offers", "List MarvelUs's three equal offers: the Staff-level AI Assessment (the lead, priced by headcount), digital support and SEO. Also returns the smaller first step, the Business Assessment.", {}),
+    ("get_assessment_details", "The Staff-level AI Assessment for businesses with roughly 15 to 150 staff: path, what is delivered, the tasks-not-jobs promise, the dollar maths, the honesty rule, who it suits and how it is priced (by headcount, no published figures).", {}),
+    ("get_business_assessment_details", "The Business Assessment (AI Readiness), a smaller first step at $1,000 AUD plus GST: duration, scoring dimensions, process and method.", {}),
+    ("get_pricing", "What is priced and what is not. The staff-level assessment is priced by headcount with no published figures. The Business Assessment is $1,000 AUD plus GST. Digital support and SEO are scoped to the business.", {}),
+    ("get_sample_report", "The example staff-level findings report, with illustrative data clearly labelled as an example, not client data.", {}),
     ("start_quiz_preview", "Open the free 9 step quiz preview on this page when it is available, and describe its steps. Nothing is stored or sent.", {"open": {"type": "boolean", "description": "Open the quiz panel if this page has one."}}),
     ("get_contact", "Contact state. Email and phone are placeholders until MarvelUs publishes them. Booking lives at the booking page.", {}),
     ("get_site_map", "Every page on the site with a one line note.", {}),
 ]
 DELIGHT = {
     "get_offers": {"line": "Three offers, equal weight. Pick the one that fits today.", "tone": "plain", "emoji": "🧭", "media_url": None},
-    "get_assessment_details": {"line": "One call, one report, the lowest dimension first.", "tone": "plain", "emoji": "📋", "media_url": None},
-    "get_pricing": {"line": "One fixed price, the rest scoped to the business.", "tone": "plain", "emoji": "💬", "media_url": None},
-    "get_sample_report": {"line": "Invented numbers, real maths.", "tone": "dry", "emoji": "🧮", "media_url": None},
+    "get_assessment_details": {"line": "Ask the people doing the work. Tasks, not jobs.", "tone": "plain", "emoji": "📋", "media_url": None},
+    "get_business_assessment_details": {"line": "A smaller first step you can start now.", "tone": "plain", "emoji": "🪜", "media_url": None},
+    "get_pricing": {"line": "The big one is priced by headcount. The small one is fixed.", "tone": "plain", "emoji": "💬", "media_url": None},
+    "get_sample_report": {"line": "Illustrative numbers, real maths.", "tone": "dry", "emoji": "🧮", "media_url": None},
     "start_quiz_preview": {"line": "About a minute, and nothing leaves the browser.", "tone": "plain", "emoji": "⏱️", "media_url": None},
     "get_contact": {"line": "No public email or phone yet. The booking page is open.", "tone": "plain", "emoji": "📮", "media_url": None},
     "get_site_map": {"line": "Every page, one line each.", "tone": "plain", "emoji": "🗺️", "media_url": None},
@@ -95,8 +97,9 @@ def main():
 
 def tool_data(name, ad):
     return {
-        "get_offers": {"offers": ad["offers"], "note": "The three offers have equal weight."},
+        "get_offers": {"offers": ad["offers"], "assessment_area": ad["assessment_area"], "note": "The three offers have equal weight. The staff-level assessment leads the assessment area, with the Business Assessment as a smaller first step."},
         "get_assessment_details": ad["assessment"],
+        "get_business_assessment_details": ad["business_assessment"],
         "get_pricing": ad["pricing"],
         "get_sample_report": ad["sample_report"],
         "start_quiz_preview": ad["quiz"],

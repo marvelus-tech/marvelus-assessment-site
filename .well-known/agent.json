@@ -13,7 +13,7 @@
  "tools": [
   {
    "name": "get_offers",
-   "description": "List MarvelUs's three equal offers: digital support, SEO and the Business Assessment.",
+   "description": "List MarvelUs's three equal offers: the Staff-level AI Assessment (the lead, priced by headcount), digital support and SEO. Also returns the smaller first step, the Business Assessment.",
    "inputSchema": {
     "type": "object",
     "properties": {},
@@ -23,6 +23,14 @@
     "ok": true,
     "data": {
      "offers": [
+      {
+       "id": "staff-assessment",
+       "name": "Staff-level AI Assessment",
+       "tag": "Ask the people doing the work",
+       "price": "Priced by headcount",
+       "url": "/assessment/",
+       "summary": "For businesses with roughly 15 to 150 staff. A 10-minute chat with the owner, then a short survey and a 15 minute chat with each person on your team. You get every repeat task in hours and dollars a year, ranked, with no names."
+      },
       {
        "id": "digital-support",
        "name": "Digital support",
@@ -38,17 +46,24 @@
        "price": "Scoped to your business",
        "url": "/services/seo/",
        "summary": "Search work that gets the right people to your site and makes sure they can act when they arrive. We fix what is broken, write what is missing and report what changed."
-      },
-      {
-       "id": "business-assessment",
-       "name": "Business Assessment (AI Readiness)",
-       "tag": "Know where to start",
-       "price": "$1,000 AUD + GST",
-       "url": "/assessment/",
-       "summary": "A phone intake call of about 15 minutes and a full written report. You get a score out of 100, your opportunities ranked, and the monthly cost of each one in dollars."
       }
      ],
-     "note": "The three offers have equal weight."
+     "assessment_area": {
+      "lead": {
+       "id": "staff-assessment",
+       "name": "Staff-level AI Assessment",
+       "pricing": "Priced by headcount",
+       "url": "/assessment/"
+      },
+      "smaller_first_step": {
+       "id": "business-assessment",
+       "name": "Business Assessment (AI Readiness)",
+       "price_label": "$1,000 + GST",
+       "url": "/business-assessment/",
+       "note": "A smaller first step you can start now."
+      }
+     },
+     "note": "The three offers have equal weight. The staff-level assessment leads the assessment area, with the Business Assessment as a smaller first step."
     },
     "meta": {
      "tool": "get_offers",
@@ -67,7 +82,117 @@
   },
   {
    "name": "get_assessment_details",
-   "description": "Price, duration, scoring dimensions, process and method for the Business Assessment (AI Readiness).",
+   "description": "The Staff-level AI Assessment for businesses with roughly 15 to 150 staff: path, what is delivered, the tasks-not-jobs promise, the dollar maths, the honesty rule, who it suits and how it is priced (by headcount, no published figures).",
+   "inputSchema": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+   },
+   "response": {
+    "ok": true,
+    "data": {
+     "name": "Staff-level AI Assessment",
+     "role": "The lead offer",
+     "for": "Businesses with roughly 15 to 150 staff, owner-led or run by an owner and a general manager, with a lot of repeatable admin.",
+     "idea": "We ask the people doing the work, not only the owner.",
+     "pricing": {
+      "model": "Priced by headcount",
+      "amount": null,
+      "published_figures": false,
+      "how_to_get_a_quote": "Book the 10-minute chat. A quote follows once we know the headcount."
+     },
+     "path": [
+      {
+       "step": 1,
+       "name": "A 10-minute chat.",
+       "detail": "A short call with the owner. We ask where the time goes and which tasks come to mind. You decide if it is worth going further, and we say so if it is not."
+      },
+      {
+       "step": 2,
+       "name": "The paid assessment.",
+       "detail": "Your team does a short survey of about 5 minutes. It ends with a 15 minute chat with each person, recorded with an AI note taker only with their explicit consent."
+      },
+      {
+       "step": 3,
+       "name": "Findings and presentation.",
+       "detail": "A findings report with every task as times per week, minutes each, hours a year and dollars a year, ranked, with no names. Then we present it to leadership, with one working demo on your own redacted paperwork."
+      },
+      {
+       "step": 4,
+       "name": "Optional ongoing support.",
+       "detail": "An optional ongoing support step, scoped after the findings."
+      }
+     ],
+     "what_is_delivered": [
+      "Team survey: about 5 minutes per person, ending with a booking for a 15 minute chat.",
+      "A 15 minute chat with each person, recorded with an AI note taker with explicit consent.",
+      "Findings report: every task as times per week, minutes each, hours a year and dollars a year, ranked, with no names.",
+      "Findings presentation to leadership, including one working demo on the business's own redacted paperwork."
+     ],
+     "tasks_not_jobs_promise": "Answers are grouped by task and role, never by name. Nobody is being assessed.",
+     "dollar_maths": "times per week x minutes each x 52 x pay rate = dollars a year. The Victorian average rate is used if the business prefers not to share pay rates.",
+     "honesty_rule": "Hours only count as dollars when spend stops, a hire is avoided, or waiting work gets done. Recovered time is capacity until it is used.",
+     "staff_time_cost": "A 5 minute survey and a 15 minute chat for each person. One call for the owner.",
+     "optional_next_step": "An optional ongoing support step, scoped after the findings.",
+     "consent_and_privacy": "Recording needs explicit consent. Retention plan and handling of declined recordings are placeholders until MarvelUs confirms them. Not legal advice.",
+     "who_we_work_with": [
+      {
+       "name": "Trades and construction",
+       "repeat_admin": "Quotes, job scheduling, variations and invoicing."
+      },
+      {
+       "name": "Multi-practitioner clinics",
+       "repeat_admin": "Bookings, reminders, intake forms and rescheduling."
+      },
+      {
+       "name": "Real estate",
+       "repeat_admin": "Enquiries, inspection bookings, follow-ups and listing paperwork."
+      },
+      {
+       "name": "NDIS providers",
+       "repeat_admin": "Scheduling, shift notes, plan paperwork and invoicing."
+      },
+      {
+       "name": "Logistics and transport",
+       "repeat_admin": "Quotes, bookings, dispatch scheduling and invoicing."
+      },
+      {
+       "name": "Manufacturers and fabricators",
+       "repeat_admin": "Quotes, job paperwork, ordering and invoicing."
+      },
+      {
+       "name": "Auto repair",
+       "repeat_admin": "Bookings, quotes, parts ordering and invoicing."
+      }
+     ],
+     "location": "Melbourne based, working remotely with businesses anywhere in Australia.",
+     "sample_report_url": "https://marvelus-tech.github.io/marvelus-assessment-site/report/sample/",
+     "book_the_chat_url": "https://marvelus-tech.github.io/marvelus-assessment-site/book/",
+     "smaller_first_step": {
+      "name": "Business Assessment (AI Readiness)",
+      "price_label": "$1,000 + GST",
+      "url": "https://marvelus-tech.github.io/marvelus-assessment-site/business-assessment/",
+      "purchase_url": "https://marvelus-tech.github.io/readiness/"
+     }
+    },
+    "meta": {
+     "tool": "get_assessment_details",
+     "version": "1.0",
+     "site": "https://marvelus-tech.github.io/marvelus-assessment-site/",
+     "generated_at": "2026-10-28",
+     "draft_notice": "Draft site: placeholders remain and pages are marked noindex."
+    },
+    "delight": {
+     "line": "Ask the people doing the work. Tasks, not jobs.",
+     "tone": "plain",
+     "emoji": "📋",
+     "media_url": null
+    }
+   }
+  },
+  {
+   "name": "get_business_assessment_details",
+   "description": "The Business Assessment (AI Readiness), a smaller first step at $1,000 AUD plus GST: duration, scoring dimensions, process and method.",
    "inputSchema": {
     "type": "object",
     "properties": {},
@@ -77,6 +202,7 @@
     "ok": true,
     "data": {
      "name": "Business Assessment (AI Readiness)",
+     "role": "A smaller first step you can start now",
      "price": {
       "amount": 1000,
       "currency": "AUD",
@@ -196,26 +322,27 @@
       "If the hours just disappear into the day, the number is zero."
      ],
      "purchase_url": "https://marvelus-tech.github.io/readiness/",
-     "book_a_call_url": "https://marvelus-tech.github.io/marvelus-assessment-site/book/"
+     "sample_report_url": "https://marvelus-tech.github.io/marvelus-assessment-site/report/business-assessment-sample/",
+     "details_url": "https://marvelus-tech.github.io/marvelus-assessment-site/business-assessment/"
     },
     "meta": {
-     "tool": "get_assessment_details",
+     "tool": "get_business_assessment_details",
      "version": "1.0",
      "site": "https://marvelus-tech.github.io/marvelus-assessment-site/",
      "generated_at": "2026-10-28",
      "draft_notice": "Draft site: placeholders remain and pages are marked noindex."
     },
     "delight": {
-     "line": "One call, one report, the lowest dimension first.",
+     "line": "A smaller first step you can start now.",
      "tone": "plain",
-     "emoji": "📋",
+     "emoji": "🪜",
      "media_url": null
     }
    }
   },
   {
    "name": "get_pricing",
-   "description": "What is priced and what is not. The assessment is $1,000 AUD plus GST. Other offers are scoped to the business.",
+   "description": "What is priced and what is not. The staff-level assessment is priced by headcount with no published figures. The Business Assessment is $1,000 AUD plus GST. Digital support and SEO are scoped to the business.",
    "inputSchema": {
     "type": "object",
     "properties": {},
@@ -224,11 +351,18 @@
    "response": {
     "ok": true,
     "data": {
+     "staff_level_assessment": {
+      "model": "Priced by headcount",
+      "amount": null,
+      "published_figures": false,
+      "cta": "Book the 10-minute chat to get a quote"
+     },
      "business_assessment": {
       "amount": 1000,
       "currency": "AUD",
       "gst_included": false,
-      "label": "$1,000 + GST"
+      "label": "$1,000 + GST",
+      "note": "A smaller first step you can start now."
      },
      "digital_support": {
       "price": null,
@@ -240,7 +374,7 @@
       "label": "Scoped to your business",
       "cta": "Book a call"
      },
-     "notes": "Digital support and SEO have no published price."
+     "notes": "The staff-level assessment is priced by headcount and has no published figures. Digital support and SEO have no published price."
     },
     "meta": {
      "tool": "get_pricing",
@@ -250,7 +384,7 @@
      "draft_notice": "Draft site: placeholders remain and pages are marked noindex."
     },
     "delight": {
-     "line": "One fixed price, the rest scoped to the business.",
+     "line": "The big one is priced by headcount. The small one is fixed.",
      "tone": "plain",
      "emoji": "💬",
      "media_url": null
@@ -259,7 +393,7 @@
   },
   {
    "name": "get_sample_report",
-   "description": "The example report, with invented data clearly labelled as an example.",
+   "description": "The example staff-level findings report, with illustrative data clearly labelled as an example, not client data.",
    "inputSchema": {
     "type": "object",
     "properties": {},
@@ -268,59 +402,75 @@
    "response": {
     "ok": true,
     "data": {
-     "label": "Example only, invented data, not a client result",
+     "label": "Example only, illustrative data, not client data",
      "url": "https://marvelus-tech.github.io/marvelus-assessment-site/report/sample/",
-     "score": 60,
-     "score_out_of": 100,
-     "dimension_levels": {
-      "Tooling": 4,
-      "Data readiness": 2,
-      "Process maturity": 3,
-      "Automation": 3,
-      "Team and AI literacy": 3
+     "pay_rate_used_aud_per_hour": 53.71,
+     "pay_rate_note": "Victorian average, used as the default when a business does not share pay rates.",
+     "illustration": {
+      "role": "Estimator",
+      "task": "Writing quotes",
+      "times_per_week": 10,
+      "minutes_each": 60,
+      "hours_per_week": 10.0,
+      "hours_per_year": 520,
+      "dollars_per_year_aud": 27929
      },
-     "lowest_dimension": "Data readiness",
-     "hourly_rate_used": 50,
-     "total_hours_per_week": 18,
-     "time_cost_per_month": 3897,
-     "counted_as_money_per_month": 3031,
-     "opportunities": [
+     "ranked_tasks": [
       {
        "rank": 1,
-       "name": "Chasing and re-keying quotes",
-       "hours_per_week": 8,
-       "monthly_cost": 1732,
-       "money_route": "counts"
+       "role": "Estimator",
+       "task": "Writing quotes from site notes and photos",
+       "times_per_week": 10,
+       "minutes_each": 60,
+       "hours_per_year": 520,
+       "dollars_per_year_aud": 27929,
+       "money_route": "Waiting work gets done"
       },
       {
        "rank": 2,
-       "name": "After-hours enquiries going unanswered",
-       "hours_per_week": 4,
-       "monthly_cost": 866,
-       "money_route": "counts"
+       "role": "Office administrator",
+       "task": "Retyping job details into the accounting software",
+       "times_per_week": 25,
+       "minutes_each": 12,
+       "hours_per_year": 260,
+       "dollars_per_year_aud": 13965,
+       "money_route": "Capacity until used"
       },
       {
        "rank": 3,
-       "name": "Weekly reporting built by hand",
-       "hours_per_week": 2,
-       "monthly_cost": 433,
-       "money_route": "zero"
+       "role": "Project coordinator",
+       "task": "Chasing approvals and missing information",
+       "times_per_week": 12,
+       "minutes_each": 20,
+       "hours_per_year": 208,
+       "dollars_per_year_aud": 11172,
+       "money_route": "Capacity until used"
       },
       {
        "rank": 4,
-       "name": "Chasing overdue invoices",
-       "hours_per_week": 2,
-       "monthly_cost": 433,
-       "money_route": "unknown"
+       "role": "Office administrator",
+       "task": "Answering the same customer questions",
+       "times_per_week": 30,
+       "minutes_each": 5,
+       "hours_per_year": 130,
+       "dollars_per_year_aud": 6982,
+       "money_route": "A hire avoided"
       },
       {
        "rank": 5,
-       "name": "Supplier order paperwork",
-       "hours_per_week": 2,
-       "monthly_cost": 433,
-       "money_route": "counts"
+       "role": "Accounts",
+       "task": "Chasing overdue invoices",
+       "times_per_week": 8,
+       "minutes_each": 15,
+       "hours_per_year": 104,
+       "dollars_per_year_aud": 5586,
+       "money_route": "Not known yet"
       }
-     ]
+     ],
+     "total_hours_per_year": 1222,
+     "total_dollars_per_year_aud": 65634,
+     "honesty_rule": "Hours only count as dollars when spend stops, a hire is avoided, or waiting work gets done. Recovered time is capacity until it is used.",
+     "business_assessment_sample_url": "https://marvelus-tech.github.io/marvelus-assessment-site/report/business-assessment-sample/"
     },
     "meta": {
      "tool": "get_sample_report",
@@ -330,7 +480,7 @@
      "draft_notice": "Draft site: placeholders remain and pages are marked noindex."
     },
     "delight": {
-     "line": "Invented numbers, real maths.",
+     "line": "Illustrative numbers, real maths.",
      "tone": "dry",
      "emoji": "🧮",
      "media_url": null
@@ -370,6 +520,10 @@
       "Email gate (demo, nothing is sent)",
       "Result (example-style preview)"
      ],
+     "result_next_steps": {
+      "primary": "Book the 10-minute chat (staff-level assessment)",
+      "secondary": "Business Assessment, $1,000 AUD + GST"
+     },
      "stored_or_transmitted": "Nothing. The quiz runs in the browser only.",
      "preview_hourly_rate_aud": 50
     },
@@ -404,7 +558,7 @@
      "phone": null,
      "booking_path": "/book/",
      "booking_embed_connected": false,
-     "message": "Contact email and phone are not published yet. Use the booking page."
+     "message": "Contact email and phone are not published yet. Use the booking page for the 10-minute chat."
     },
     "meta": {
      "tool": "get_contact",
@@ -436,12 +590,17 @@
       {
        "title": "Home",
        "path": "/",
-       "note": "Quiz, offers, process, sample report teaser"
+       "note": "Staff-level AI Assessment first, then the three offers"
+      },
+      {
+       "title": "Staff-level AI Assessment",
+       "path": "/assessment/",
+       "note": "For businesses with roughly 15 to 150 staff. Priced by headcount. Book a 10-minute chat"
       },
       {
        "title": "Business Assessment",
-       "path": "/assessment/",
-       "note": "$1,000 AUD + GST, phone intake and scored report"
+       "path": "/business-assessment/",
+       "note": "A smaller first step you can start now. $1,000 AUD + GST, phone intake and scored report"
       },
       {
        "title": "Services",
@@ -476,7 +635,7 @@
       {
        "title": "Pricing",
        "path": "/pricing/",
-       "note": "Three equal offers"
+       "note": "Priced by headcount for the staff-level assessment, a fixed price for the smaller first step"
       },
       {
        "title": "Insights",
@@ -514,18 +673,23 @@
        "note": "MarvelUs, how we work"
       },
       {
-       "title": "Book a call",
+       "title": "Book the 10-minute chat",
        "path": "/book/",
        "note": "Booking with a placeholder embed slot"
       },
       {
        "title": "AI consulting in Melbourne",
        "path": "/ai-consulting-melbourne/",
-       "note": "Melbourne page"
+       "note": "Melbourne based, remote across Australia"
       },
       {
-       "title": "Sample report",
+       "title": "Sample staff-level findings report",
        "path": "/report/sample/",
+       "note": "Example report, illustrative data, not client data"
+      },
+      {
+       "title": "Sample Business Assessment report",
+       "path": "/report/business-assessment-sample/",
        "note": "Example report, invented data"
       },
       {

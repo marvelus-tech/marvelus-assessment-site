@@ -209,14 +209,14 @@
       '<h3>A prompt to try today</h3><div class="promptbox" id="prompt-box">' + esc(fill(pack.prompt)) + '</div>' +
       '<div class="btn-row"><button type="button" class="btn btn--ghost btn--sm" data-copy-prompt>Copy the prompt</button><button type="button" class="btn btn--ghost btn--sm" data-print-result>Print or save as PDF</button></div>' +
       cost +
-      '<p class="small muted">This is a preview built from nine answers in your browser. It is not the scored report. The Business Assessment looks at your whole business.' + (S ? "" : " Nothing was sent or saved.") + '</p>' +
+      '<p class="small muted">This is a preview built from nine answers in your browser. It is not the scored report. A full assessment looks at the whole business.' + (S ? "" : " Nothing was sent or saved.") + '</p>' +
       (S ? '<p>This is an example. Yours uses your task, your numbers and your words, and takes about a minute.</p><div class="btn-row"><button type="button" class="btn btn--primary" data-start-real>Show me my #1 opportunity</button></div>' : "") +
       '</div>' +
       '<div class="q-card next-panel"><p class="eyebrow">The next step</p><h3>You have your #1. There are more.</h3>' +
-      '<p>The Business Assessment looks across the whole business, scores where you are out of 100, and ranks every opportunity by what it is worth. It takes ' + esc(Q.call) + ' on the phone.</p>' +
-      '<div class="btn-row"><a class="btn btn--primary" href="' + esc(Q.purchaseUrl) + '" data-cta="purchase" data-where="quiz-result">Get the assessment, ' + esc(Q.priceLabel) + ' <span class="btn__arrow" aria-hidden="true">&rarr;</span></a>' +
-      '<a class="btn btn--secondary" href="' + MV.url(Q.bookPath) + '?src=quiz">Book a call</a>' + (S ? "" : '<button type="button" class="linklike" data-restart>Start over</button>') + '</div>' +
-      '<p class="small muted">Bring your result to the call. ' + esc(Q.priceLong) + '. GST is not included in the $1,000.</p></div>';
+      '<p>The Staff-level AI Assessment asks the people doing the work, not only the owner, and ranks every repeat task in hours and dollars a year. It suits businesses with roughly 15 to 150 staff and is priced by headcount. Start with a 10-minute chat.</p>' +
+      '<div class="btn-row"><a class="btn btn--primary" href="' + MV.url(Q.bookPath) + '?src=quiz" data-cta="book-chat" data-where="quiz-result">Book the 10-minute chat <span class="btn__arrow" aria-hidden="true">&rarr;</span></a>' +
+      '<a class="btn btn--secondary" href="' + esc(Q.purchaseUrl) + '" data-cta="purchase" data-where="quiz-result">Or start smaller: Business Assessment, ' + esc(Q.priceLabel) + '</a>' + (S ? "" : '<button type="button" class="linklike" data-restart>Start over</button>') + '</div>' +
+      '<p class="small muted">Bring your result to the chat. The Business Assessment is a smaller first step you can start now: a phone intake of ' + esc(Q.call) + ' and a scored report. ' + esc(Q.priceLong) + '. GST is not included in the $1,000.</p></div>';
   }
   R.result = function () {
     root.innerHTML = resultHtml();

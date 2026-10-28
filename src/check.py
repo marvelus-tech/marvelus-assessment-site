@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 """Self-checks: links, anchors, h1, forbidden strings, meta uniqueness, rough HTML balance."""
-import re, sys, pathlib, collections, json
+import os, re, sys, pathlib, collections, json
 from html.parser import HTMLParser
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-FORBID = [r"maya", r"chrome", "\u2014", "\u2013", r"founder", r"certified ai partners", r"utah", r"cal\.com", r"refund", r"guarantee", r"money-back", r"credit toward", r"&mdash;", r"&ndash;"]
+FORBID = ["\u2014", "\u2013", r"&mdash;", r"&ndash;", r"&#8212;", r"&#8211;"]
+# The long forbidden-word list is kept outside this public repo. Set ASSESS_FORBID_FILE to use another path.
+_ext = pathlib.Path(os.environ.get("ASSESS_FORBID_FILE", "/workspace/.assess-site-forbidden.txt"))
+if _ext.exists():
+    FORBID += [l.strip() for l in _ext.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")]
+else:
+    print("note: external forbidden list not found, only the dash checks ran")
 VOID = {"meta","link","br","hr","img","input","source","wbr","path","rect","circle"}
 class P(HTMLParser):
     def __init__(s):

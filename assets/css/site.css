@@ -100,7 +100,7 @@ code { font-family: var(--font-mono); font-size: .88em; background: var(--paper-
 }
 @media (min-width: 1020px) {
   .site-nav { order: 0; width: auto; padding: 0; margin-left: 1.5rem; }
-  .nav-book { display: list-item; }
+  .nav-book { display: none; }
 }
 
 /* buttons */
