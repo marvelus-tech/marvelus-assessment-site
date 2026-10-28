@@ -1,0 +1,20 @@
+{
+  "_readme": "Single place to swap launch facts. Edit values here, then run: python3 src/build.py",
+  "brand": "MarvelUs",
+  "siteUrl": "https://marvelus-tech.github.io/marvelus-assessment-site",
+  "noindex": true,
+  "contactEmail": "",
+  "contactPhone": "",
+  "purchaseUrl": "https://marvelus-tech.github.io/readiness/",
+  "bookingPath": "/book/",
+  "bookingEmbedUrl": "",
+  "assessmentPriceAUD": 1000,
+  "assessmentPriceLabel": "$1,000 + GST",
+  "assessmentCurrency": "AUD",
+  "callLength": "about 15 minutes",
+  "reportTurnaround": "the same business day as your call",
+  "previewHourlyRate": 50,
+  "weeksPerMonth": 4.33,
+  "location": "Melbourne, Australia",
+  "buildDate": "2026-10-28"
+}

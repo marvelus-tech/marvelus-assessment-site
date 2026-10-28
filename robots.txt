@@ -1,0 +1,5 @@
+# Draft build: pages carry noindex while placeholders remain.
+User-agent: *
+Allow: /
+
+Sitemap: https://marvelus-tech.github.io/marvelus-assessment-site/sitemap.xml
